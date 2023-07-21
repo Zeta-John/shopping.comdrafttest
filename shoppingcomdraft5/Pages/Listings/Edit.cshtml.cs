@@ -56,7 +56,7 @@ namespace shoppingcomdraft5.Pages.Listings
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!ListingExists(Listing.ListingID))
+                if (!ListingExists((int)Listing.ListingID))
                 {
                     return NotFound();
                 }
