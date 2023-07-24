@@ -22,7 +22,7 @@ namespace shoppingcomdraft5
             services.AddDbContext<shoppingcomdraft5Context>(options =>
                     options.UseSqlServer(Configuration.GetConnectionString("shoppingcomdraft5Context")));
 
-            services.AddIdentity<ApplicationUser, Microsoft.AspNetCore.Identity.IdentityRole>()
+            services.AddIdentity<ApplicationUser, ApplicationRole>()
              .AddDefaultUI()
              .AddEntityFrameworkStores<shoppingcomdraft5Context>()
              .AddDefaultTokenProviders();
