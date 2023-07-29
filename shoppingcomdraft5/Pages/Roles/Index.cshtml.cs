@@ -62,7 +62,7 @@ namespace shoppingcomdraft5.Pages.Roles
           if (User.IsInRole("Admin"))
             {
                 IQueryable<string> RoleQuery = from m in _roleManager.Roles where m.Name == "Member" orderby m.Name select m.Name;
-                IQueryable<string> UsersQuery = from u in _context.Users orderby u.UserName select u.UserName;
+                IQueryable<string> UsersQuery = from u in _context.Users where u.Email != "owner@gmail.com" orderby u.UserName select u.UserName;
                 RolesSelectList = new SelectList(await RoleQuery.Distinct().ToListAsync());
                 UsersSelectList = new SelectList(await UsersQuery.Distinct().ToListAsync());
                 // Get all the roles 
@@ -73,7 +73,7 @@ namespace shoppingcomdraft5.Pages.Roles
             else
             {
                 IQueryable<string> RoleQuery = from m in _roleManager.Roles where m.Name != "Owner" orderby m.Name select m.Name;
-                IQueryable<string> UsersQuery = from u in _context.Users orderby u.UserName select u.UserName;
+                IQueryable<string> UsersQuery = from u in _context.Users where u.Email != "owner@gmail.com"  orderby u.UserName select u.UserName;
                 RolesSelectList = new SelectList(await RoleQuery.Distinct().ToListAsync());
                 UsersSelectList = new SelectList(await UsersQuery.Distinct().ToListAsync());
                 // Get all the roles 
@@ -95,6 +95,15 @@ namespace shoppingcomdraft5.Pages.Roles
             {
                 await _userManager.RemoveFromRoleAsync(AppUser, "Member");
             }
+            else if (await _userManager.IsInRoleAsync(AppUser, "Admin"))
+            {
+                await _userManager.RemoveFromRoleAsync(AppUser, "Admin");
+            }
+            else if (await _userManager.IsInRoleAsync(AppUser, "Owner"))
+            {
+                await _userManager.RemoveFromRoleAsync(AppUser, "Owner");
+            }
+
             IdentityRole AppRole = await _roleManager.FindByNameAsync(selectedrolename);
             IdentityResult roleResult = await _userManager.AddToRoleAsync(AppUser, AppRole.Name);
             if (roleResult.Succeeded)
