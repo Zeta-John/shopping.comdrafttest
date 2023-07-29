@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 
 namespace shoppingcomdraft5.Data
 {
-    public class shoppingcomdraft5Context : IdentityDbContext<ApplicationUser>
+    public class shoppingcomdraft5Context : IdentityDbContext<ApplicationUser, ApplicationRole, string>
     {
         public shoppingcomdraft5Context (DbContextOptions<shoppingcomdraft5Context> options) : base(options)
         { }
@@ -23,5 +23,7 @@ namespace shoppingcomdraft5.Data
         }
 
         public DbSet<shoppingcomdraft5.Models.Listing> Listing { get; set; } = default!;
+
+        public DbSet<shoppingcomdraft5.Models.AuditLog> AuditLogs { get; set; }
     }
 }

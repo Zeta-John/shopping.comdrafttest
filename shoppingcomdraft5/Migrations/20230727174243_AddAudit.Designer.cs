@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using shoppingcomdraft5.Data;
 
@@ -11,9 +12,10 @@ using shoppingcomdraft5.Data;
 namespace shoppingcomdraft5.Migrations
 {
     [DbContext(typeof(shoppingcomdraft5Context))]
-    partial class shoppingcomdraft5ContextModelSnapshot : ModelSnapshot
+    [Migration("20230727174243_AddAudit")]
+    partial class AddAudit
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

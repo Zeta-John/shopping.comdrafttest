@@ -24,6 +24,7 @@ using shoppingcomdraft5.Models;
 using static QRCoder.PayloadGenerator;
 using shoppingcomdraft5.Data;
 
+
 namespace shoppingcomdraft5.Areas.Identity.Pages.Account
 {
     public class RegisterModel : PageModel

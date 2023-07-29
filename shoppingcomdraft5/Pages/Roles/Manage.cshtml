@@ -1,10 +1,15 @@
 ﻿@page
-@model shoppingcomdraft5.Pages.Roles.IndexModel
+@model shoppingcomdraft5.Pages.Roles.ManageModel
 @{
     ViewData["Title"] = "Manage User Roles";
 }
 <h2>Role-based Authorization Management</h2>
-
+<div class="row">
+    <div class="col-md-4">
+        <a asp-page="Create">[Create New Role]</a> |
+        <a asp-page="Manage">[Manage User Roles]</a>
+    </div>
+</div>
 @if (TempData["message"] != null)
 {
     <p><font color="red">@TempData["message"]</font></p>
@@ -32,6 +37,7 @@
         }
     </tbody>
 </table>
+
 <h3>[Add Role to User]</h3>
 <hr />
 <div class="row">
@@ -61,7 +67,7 @@
             @Html.DropDownListFor(m => m.delrolename, Model.RolesSelectList, "Select Role",
             new { @class = "form-control" })
             <br />
-            <input type="submit" value="Delete this user from Role" asp-page-handler="DeleteUserRole" />
+            <input type="submit" value="Delete this user from Role" asp-pagehandler="DeleteUserRole" />
         </form>
     </div>
 </div>

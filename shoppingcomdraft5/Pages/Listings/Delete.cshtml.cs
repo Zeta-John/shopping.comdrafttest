@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using shoppingcomdraft5.Data;
 using shoppingcomdraft5.Models;
+using Newtonsoft.Json;
 
 namespace shoppingcomdraft5.Pages.Listings
 {
@@ -56,6 +57,37 @@ namespace shoppingcomdraft5.Pages.Listings
             {
                 Listing = listing;
                 _context.Listing.Remove(Listing);
+            }
+
+            //Creating an audit record
+            if (await _context.SaveChangesAsync() > 0)
+            {
+                // Create an auditrecord object
+                var auditlog = new AuditLog();
+
+                //Obtain logged in user's username
+                var userID = User.Identity.Name.ToString();
+                auditlog.Username = userID;
+
+                //Audit Action Type
+                auditlog.ActionType = "Delete";
+
+                //Time when the event occurred
+                auditlog.DateTimeStamp = DateTime.Now;
+
+                //Table Name
+                auditlog.TableName = "Listing";
+
+                //Table ID
+                auditlog.TableID = Listing.ListingID;
+
+                //Before changes
+                auditlog.BeforeChange = JsonConvert.SerializeObject(Listing);
+
+                //After changes
+                auditlog.AfterChange = " ";
+
+                _context.AuditLogs.Add(auditlog);
                 await _context.SaveChangesAsync();
             }
 

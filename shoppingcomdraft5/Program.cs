@@ -20,6 +20,7 @@ builder.Services.AddSession(options =>
     options.Cookie.IsEssential = true;
 });
 
+
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
     .AddDefaultUI()
     .AddEntityFrameworkStores<shoppingcomdraft5Context>()
