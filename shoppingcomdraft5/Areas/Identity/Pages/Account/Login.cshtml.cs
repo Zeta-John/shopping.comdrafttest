@@ -15,6 +15,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Logging;
 using shoppingcomdraft5.Models;
+using Newtonsoft.Json;
 
 namespace shoppingcomdraft5.Areas.Identity.Pages.Account
 {
@@ -22,11 +23,14 @@ namespace shoppingcomdraft5.Areas.Identity.Pages.Account
     {
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly ILogger<LoginModel> _logger;
+        private readonly shoppingcomdraft5.Data.shoppingcomdraft5Context _context;
 
-        public LoginModel(SignInManager<ApplicationUser> signInManager, ILogger<LoginModel> logger)
+
+        public LoginModel(SignInManager<ApplicationUser> signInManager, ILogger<LoginModel> logger, shoppingcomdraft5.Data.shoppingcomdraft5Context context)
         {
             _signInManager = signInManager;
             _logger = logger;
+            _context = context;
         }
 
         /// <summary>
@@ -118,7 +122,65 @@ namespace shoppingcomdraft5.Areas.Identity.Pages.Account
                 if (result.Succeeded)
                 {
                     _logger.LogInformation("User logged in.");
+
+                    //Login attempt Succeeded, create an audit log
+                    var auditlog = new AuditLog();
+
+                    //Username of the user that logged in
+                    auditlog.Username = Input.Email;
+
+                    //Audit Action Type
+                    auditlog.ActionType = "Login Success";
+
+                    //Time when the event occurred
+                    auditlog.DateTimeStamp = DateTime.Now;
+
+                    //Table Name
+                    auditlog.TableName = "Login";
+
+                    //Table ID
+                    auditlog.TableID = -1;
+
+                    //Before changes
+                    auditlog.BeforeChange = " ";
+
+                    //After changes
+                    auditlog.AfterChange = " ";
+
+                    _context.AuditLogs.Add(auditlog);
+                    await _context.SaveChangesAsync();
+
                     return LocalRedirect(returnUrl);
+                }
+                else 
+                {
+                    //Login attempt failed, create an audit log
+                    var auditlog = new AuditLog();
+
+                    //Username of the user that attempted to log in
+                    auditlog.Username = Input.Email;
+
+                    //Audit Action Type
+                    auditlog.ActionType = "Failed Login";
+
+                    //Time when the event occurred
+                    auditlog.DateTimeStamp = DateTime.Now;
+
+                    //Table Name
+                    auditlog.TableName = "Login";
+
+                    //Table ID
+                    auditlog.TableID = -1;
+
+                    //Before changes
+                    auditlog.BeforeChange = " ";
+
+                    //After changes
+                    auditlog.AfterChange = " ";
+
+                    _context.AuditLogs.Add(auditlog);
+                    await _context.SaveChangesAsync();
+
                 }
                 if (result.RequiresTwoFactor)
                 {

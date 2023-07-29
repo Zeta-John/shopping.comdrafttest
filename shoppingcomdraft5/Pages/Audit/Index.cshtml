@@ -1,0 +1,72 @@
+﻿@page
+@model shoppingcomdraft5.Pages.Audit.IndexModel
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Index</h1>
+
+<p>
+    <a asp-page="Create">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.AuditLog[0].Username)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.AuditLog[0].DateTimeStamp)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.AuditLog[0].ActionType)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.AuditLog[0].TableName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.AuditLog[0].TableID)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.AuditLog[0].BeforeChange)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.AuditLog[0].AfterChange)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model.AuditLog) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Username)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.DateTimeStamp)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.ActionType)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.TableName)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.TableID)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.BeforeChange)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.AfterChange)
+            </td>
+            <td>
+                <a asp-page="./Edit" asp-route-id="@item.Audit_ID">Edit</a> |
+                <a asp-page="./Details" asp-route-id="@item.Audit_ID">Details</a> |
+                <a asp-page="./Delete" asp-route-id="@item.Audit_ID">Delete</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>

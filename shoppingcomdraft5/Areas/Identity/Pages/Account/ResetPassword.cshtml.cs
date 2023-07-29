@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
+using Newtonsoft.Json;
 using shoppingcomdraft5.Models;
 
 namespace shoppingcomdraft5.Areas.Identity.Pages.Account
@@ -82,7 +83,7 @@ namespace shoppingcomdraft5.Areas.Identity.Pages.Account
             {
                 Input = new InputModel
                 {
-                    Code = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(code))
+                    Code = code
                 };
                 return Page();
             }
@@ -112,6 +113,7 @@ namespace shoppingcomdraft5.Areas.Identity.Pages.Account
             {
                 ModelState.AddModelError(string.Empty, error.Description);
             }
+       
             return Page();
         }
     }

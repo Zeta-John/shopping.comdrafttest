@@ -4,6 +4,7 @@
 
 using System;
 using System.ComponentModel.DataAnnotations;
+using System.Configuration;
 using System.Text;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
@@ -13,19 +14,25 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
+using SendGrid;
+using SendGrid.Helpers.Mail;
 using shoppingcomdraft5.Models;
+using static QRCoder.PayloadGenerator;
 
 namespace shoppingcomdraft5.Areas.Identity.Pages.Account
 {
     public class ForgotPasswordModel : PageModel
     {
         private readonly UserManager<ApplicationUser> _userManager;
+        public readonly IConfiguration _configuration;
         private readonly IEmailSender _emailSender;
 
-        public ForgotPasswordModel(UserManager<ApplicationUser> userManager, IEmailSender emailSender)
+
+        public ForgotPasswordModel(UserManager<ApplicationUser> userManager, IEmailSender emailSender, IConfiguration configuration)
         {
             _userManager = userManager;
             _emailSender = emailSender;
+            _configuration = configuration;
         }
 
         /// <summary>
@@ -49,37 +56,45 @@ namespace shoppingcomdraft5.Areas.Identity.Pages.Account
             [EmailAddress]
             public string Email { get; set; }
         }
-
+ 
         public async Task<IActionResult> OnPostAsync()
         {
             if (ModelState.IsValid)
             {
                 var user = await _userManager.FindByEmailAsync(Input.Email);
-                if (user == null || !(await _userManager.IsEmailConfirmedAsync(user)))
+                if (user == null)
                 {
-                    // Don't reveal that the user does not exist or is not confirmed
-                    return RedirectToPage("./ForgotPasswordConfirmation");
+                    return RedirectToPage("./ResetPasswordConfirmation");
+
                 }
-
-                // For more information on how to enable account confirmation and password reset please
-                // visit https://go.microsoft.com/fwlink/?LinkID=532713
-                var code = await _userManager.GeneratePasswordResetTokenAsync(user);
-                code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
-                var callbackUrl = Url.Page(
-                    "/Account/ResetPassword",
-                    pageHandler: null,
-                    values: new { area = "Identity", code },
-                    protocol: Request.Scheme);
-
-                await _emailSender.SendEmailAsync(
-                    Input.Email,
-                    "Reset Password",
-                    $"Please reset your password by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
-
-                return RedirectToPage("./ForgotPasswordConfirmation");
+                /*if (!(await _userManager.IsEmailConfirmedAsync(user))) 
+                {
+                    return RedirectToPage("./EmailNotConfirmed");
+                }*/
+                var resetToken = await _userManager.GeneratePasswordResetTokenAsync(user);
+                var apiKey= _configuration["SendGrid:ApiKey"];
+                var client = new SendGridClient(apiKey);
+                var from = new EmailAddress("Ernestlee6851@gmail.com", "Ernest");
+                var subject = "Password Reset Request";
+                var to = new EmailAddress(Input.Email);
+                var plainTextContent = "Click the link to reset your password.";
+                var resetLink = Url.Page("/Account/ResetPassword", null, new { area = "Identity", code = resetToken }, Request.Scheme);
+                var htmlContent = $"<strong>Click <a href='{HtmlEncoder.Default.Encode(resetLink)}'>here</a> to reset your password.</strong>";
+                var msg = MailHelper.CreateSingleEmail(from, to, subject, plainTextContent, htmlContent);
+                var response = await client.SendEmailAsync(msg);
+                if (response.IsSuccessStatusCode)
+                {
+                    return RedirectToPage("./ResetPasswordConfirmation");
+                }
+                else
+                {
+                    return RedirectToPage("./ResetPasswordConfirmation");
+                }
             }
-
             return Page();
+
+        }
+
         }
     }
-}
+
