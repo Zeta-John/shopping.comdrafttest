@@ -12,6 +12,8 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
+using SendGrid.Helpers.Mail;
+using SendGrid;
 using shoppingcomdraft5.Models;
 
 namespace shoppingcomdraft5.Areas.Identity.Pages.Account.Manage
@@ -21,15 +23,18 @@ namespace shoppingcomdraft5.Areas.Identity.Pages.Account.Manage
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly IEmailSender _emailSender;
+        public readonly IConfiguration _configuration;
 
         public EmailModel(
             UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager,
-            IEmailSender emailSender)
+            IEmailSender emailSender,
+            IConfiguration configuration)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _emailSender = emailSender;
+            _configuration = configuration;
         }
 
         /// <summary>
@@ -116,7 +121,13 @@ namespace shoppingcomdraft5.Areas.Identity.Pages.Account.Manage
             var email = await _userManager.GetEmailAsync(user);
             if (Input.NewEmail != email)
             {
+                var apiKey = _configuration["SendGrid:ApiKey"];
+                var client = new SendGridClient(apiKey);
                 var userId = await _userManager.GetUserIdAsync(user);
+                var from = new EmailAddress("Ernestlee6851@gmail.com", "Ernest");
+                var to = new EmailAddress(Input.NewEmail);
+                var subject = "Changing of Email";
+                var plainTextContent = "Click the link to change your email.";
                 var code = await _userManager.GenerateChangeEmailTokenAsync(user, Input.NewEmail);
                 code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
                 var callbackUrl = Url.Page(
@@ -124,11 +135,13 @@ namespace shoppingcomdraft5.Areas.Identity.Pages.Account.Manage
                     pageHandler: null,
                     values: new { area = "Identity", userId = userId, email = Input.NewEmail, code = code },
                     protocol: Request.Scheme);
-                await _emailSender.SendEmailAsync(
+                /*await _emailSender.SendEmailAsync(
                     Input.NewEmail,
                     "Confirm your email",
-                    $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
-
+                    $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");*/
+                var htmlContent = $"<strong>Click <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>here</a> to change your email.</strong>";
+                var msg = MailHelper.CreateSingleEmail(from, to, subject, plainTextContent, htmlContent);
+                var response = await client.SendEmailAsync(msg);
                 StatusMessage = "Confirmation link to change email sent. Please check your email.";
                 return RedirectToPage();
             }
@@ -150,9 +163,14 @@ namespace shoppingcomdraft5.Areas.Identity.Pages.Account.Manage
                 await LoadAsync(user);
                 return Page();
             }
-
+            var apiKey = _configuration["SendGrid:ApiKey"];
+            var client = new SendGridClient(apiKey);
             var userId = await _userManager.GetUserIdAsync(user);
             var email = await _userManager.GetEmailAsync(user);
+            var from = new EmailAddress("Ernestlee6851@gmail.com", "Ernest");
+            var to = new EmailAddress(email);
+            var subject = "Email verification";
+            var plainTextContent = "Click the link to verify your email.";
             var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
             code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
             var callbackUrl = Url.Page(
@@ -160,13 +178,18 @@ namespace shoppingcomdraft5.Areas.Identity.Pages.Account.Manage
                 pageHandler: null,
                 values: new { area = "Identity", userId = userId, code = code },
                 protocol: Request.Scheme);
-            await _emailSender.SendEmailAsync(
+            var htmlContent = $"<strong>Click <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>here</a> to confirm your email.</strong>";
+            /*await _emailSender.SendEmailAsync(
                 email,
                 "Confirm your email",
-                $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
-
+                $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");*/
+            var msg = MailHelper.CreateSingleEmail(from, to, subject, plainTextContent, htmlContent);
+            var response = await client.SendEmailAsync(msg);
             StatusMessage = "Verification email sent. Please check your email.";
             return RedirectToPage();
+
+
+          
         }
     }
 }

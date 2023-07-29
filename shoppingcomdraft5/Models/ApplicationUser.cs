@@ -7,4 +7,5 @@ namespace shoppingcomdraft5.Models
         public DateTime BirthDate { get; set; }
         public int Age { get; set; }
     }
+
 }
