@@ -49,7 +49,7 @@ namespace shoppingcomdraft5.Areas.Identity.Pages.Account
             var result = await _userManager.ChangeEmailAsync(user, email, code);
             if (!result.Succeeded)
             {
-                StatusMessage = "Error changing email.";
+                StatusMessage = "Error changing email, ensure Email has not been registered for an acoount already";
                 return Page();
             }
 

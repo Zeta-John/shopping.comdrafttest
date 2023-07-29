@@ -13,6 +13,8 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
+using SendGrid.Helpers.Mail;
+using SendGrid;
 using shoppingcomdraft5.Models;
 
 namespace shoppingcomdraft5.Areas.Identity.Pages.Account
@@ -22,11 +24,13 @@ namespace shoppingcomdraft5.Areas.Identity.Pages.Account
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IEmailSender _emailSender;
+        public readonly IConfiguration _configuration;
 
-        public ResendEmailConfirmationModel(UserManager<ApplicationUser> userManager, IEmailSender emailSender)
+        public ResendEmailConfirmationModel(UserManager<ApplicationUser> userManager, IEmailSender emailSender, IConfiguration configuration)
         {
             _userManager = userManager;
             _emailSender = emailSender;
+            _configuration = configuration;
         }
 
         /// <summary>
@@ -69,7 +73,7 @@ namespace shoppingcomdraft5.Areas.Identity.Pages.Account
                 return Page();
             }
 
-            var userId = await _userManager.GetUserIdAsync(user);
+            /*var userId = await _userManager.GetUserIdAsync(user);
             var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
             code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
             var callbackUrl = Url.Page(
@@ -83,7 +87,33 @@ namespace shoppingcomdraft5.Areas.Identity.Pages.Account
                 $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
 
             ModelState.AddModelError(string.Empty, "Verification email sent. Please check your email.");
-            return Page();
+            return Page();*/
+            var apiKey = _configuration["SendGrid:ApiKey"];
+            var client = new SendGridClient(apiKey);
+            var userId = await _userManager.GetUserIdAsync(user);
+            var email = await _userManager.GetEmailAsync(user);
+            var from = new EmailAddress("Ernestlee6851@gmail.com", "Ernest");
+            var to = new EmailAddress(email);
+            var subject = "Email verification";
+            var plainTextContent = "Click the link to verify your email.";
+            var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+            code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
+            var callbackUrl = Url.Page(
+                "/Account/ConfirmEmail",
+                pageHandler: null,
+                values: new { area = "Identity", userId = userId, code = code },
+                protocol: Request.Scheme);
+            var htmlContent = $"<strong>Click <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>here</a> to confirm your email.</strong>";
+            /*await _emailSender.SendEmailAsync(
+                email,
+                "Confirm your email",
+                $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");*/
+            var msg = MailHelper.CreateSingleEmail(from, to, subject, plainTextContent, htmlContent);
+            var response = await client.SendEmailAsync(msg);
+            ModelState.AddModelError(string.Empty, "Verification email sent. Please check your email.");
+            return Page(); 
+
+
         }
     }
 }
