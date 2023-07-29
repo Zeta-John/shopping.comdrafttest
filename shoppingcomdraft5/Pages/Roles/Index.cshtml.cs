@@ -64,7 +64,12 @@ namespace shoppingcomdraft5.Pages.Roles
             if (User.IsInRole("Admin"))
             {
                 IQueryable<string> RoleQuery = from m in _roleManager.Roles where m.Name == "Member" orderby m.Name select m.Name;
-                IQueryable<string> UsersQuery = from u in _context.Users where u.Email != "owner@gmail.com" && u.Email != userEmail && User.IsInRole("Admin") != true
+                IQueryable<string> UsersQuery = from u in _context.Users 
+                                                join ur in _context.UserRoles on u.Id equals ur.UserId
+                                                join r in _context.Roles on ur.RoleId equals r.Id
+                                                where u.Email != "owner@gmail.com" && u.Email != userEmail 
+                                                && r.Name != "Staff" 
+                                                && r.Name != "Admin"
                                                 orderby u.UserName select u.UserName;
                 RolesSelectList = new SelectList(await RoleQuery.Distinct().ToListAsync());
                 UsersSelectList = new SelectList(await UsersQuery.Distinct().ToListAsync());

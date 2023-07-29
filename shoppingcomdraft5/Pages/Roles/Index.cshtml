@@ -32,20 +32,23 @@
         }
     </tbody>
 </table>
-<h3>[Add Role to User]</h3>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form method="post">
-            @Html.Label("Select User : ")
-            @Html.DropDownListFor(m => m.selectedusername, Model.UsersSelectList, "Select User", new { @class = "form-control" })
-            @Html.Label("Assign Role : ")
-            @Html.DropDownListFor(m => m.selectedrolename, Model.RolesSelectList, "Select Role", new { @class = "form-control" })
-            <br />
-            <input type="submit" value="Assign" />
-        </form>
+@if (User.IsInRole("Owner"))
+{
+    <h3>[Add Role to User]</h3>
+    <hr />
+    <div class="row">
+        <div class="col-md-4">
+            <form method="post">
+                @Html.Label("Select User : ")
+                @Html.DropDownListFor(m => m.selectedusername, Model.UsersSelectList, "Select User", new { @class = "form-control" })
+                @Html.Label("Assign Role : ")
+                @Html.DropDownListFor(m => m.selectedrolename, Model.RolesSelectList, "Select Role", new { @class = "form-control" })
+                <br />
+                <input type="submit" value="Assign" />
+            </form>
+        </div>
     </div>
-</div>
+}
 
 
 <hr />
