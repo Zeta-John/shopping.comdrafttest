@@ -9,12 +9,10 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 
 namespace shoppingcomdraft5.Data
 {
-    public class shoppingcomdraft5Context : IdentityDbContext<ApplicationUser>
+    public class shoppingcomdraft5Context : IdentityDbContext<ApplicationUser, ApplicationRole, string>
     {
-        public shoppingcomdraft5Context (DbContextOptions<shoppingcomdraft5Context> options)
-            : base(options)
-        {
-        }
+        public shoppingcomdraft5Context (DbContextOptions<shoppingcomdraft5Context> options) : base(options)
+        { }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -24,6 +22,8 @@ namespace shoppingcomdraft5.Data
             // Add your customizations after calling base.OnModelCreating(builder);
         }
 
-        public DbSet<shoppingcomdraft5.Models.Listing> Listing { get; set; } = default!;
+        public DbSet<Listing> Listing { get; set; } = default!;
+
+        public DbSet<Feedback> Feedbacks { get; set; }
     }
 }

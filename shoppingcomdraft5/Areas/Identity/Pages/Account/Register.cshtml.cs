@@ -18,7 +18,10 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
+using SendGrid.Helpers.Mail;
+using SendGrid;
 using shoppingcomdraft5.Models;
+using static QRCoder.PayloadGenerator;
 
 namespace shoppingcomdraft5.Areas.Identity.Pages.Account
 {
@@ -30,13 +33,15 @@ namespace shoppingcomdraft5.Areas.Identity.Pages.Account
         private readonly IUserEmailStore<ApplicationUser> _emailStore;
         private readonly ILogger<RegisterModel> _logger;
         private readonly IEmailSender _emailSender;
+        public readonly IConfiguration _configuration;
 
         public RegisterModel(
             UserManager<ApplicationUser> userManager,
             IUserStore<ApplicationUser> userStore,
             SignInManager<ApplicationUser> signInManager,
             ILogger<RegisterModel> logger,
-            IEmailSender emailSender)
+            IEmailSender emailSender,
+            IConfiguration configuration)
         {
             _userManager = userManager;
             _userStore = userStore;
@@ -44,6 +49,7 @@ namespace shoppingcomdraft5.Areas.Identity.Pages.Account
             _signInManager = signInManager;
             _logger = logger;
             _emailSender = emailSender;
+            _configuration = configuration;
         }
 
         /// <summary>
@@ -137,7 +143,7 @@ namespace shoppingcomdraft5.Areas.Identity.Pages.Account
                 {
                     _logger.LogInformation("User created a new account with password.");
 
-                    var userId = await _userManager.GetUserIdAsync(user);
+                    /*var userId = await _userManager.GetUserIdAsync(user);
                     var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
                     code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
                     var callbackUrl = Url.Page(
@@ -147,7 +153,25 @@ namespace shoppingcomdraft5.Areas.Identity.Pages.Account
                         protocol: Request.Scheme);
 
                     await _emailSender.SendEmailAsync(Input.Email, "Confirm your email",
-                        $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
+                        $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");*/
+                    var userId = await _userManager.GetUserIdAsync(user);
+                    var apiKey = _configuration["SendGrid:ApiKey"];
+                    var client = new SendGridClient(apiKey);
+                    var from = new EmailAddress("Ernestlee6851@gmail.com", "Ernest");
+                    var to = new EmailAddress(Input.Email);
+                    var subject = "Accoount Confirmation";
+                    var plainTextContent = "Click the link to confirm your account.";
+                    var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+                    code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
+                    var EmailConfirmationUrl = Url.Page(
+                        "/Account/ConfirmEmail",
+                        pageHandler: null,
+                        values: new { area = "Identity", userId = userId, code = code, returnUrl = returnUrl },
+                        protocol: Request.Scheme);
+                    var htmlContent = $"<strong>Click <a href='{HtmlEncoder.Default.Encode(EmailConfirmationUrl)}'>here</a> to confirm your account, If this was not you login to the website and reset your password through the forget password hyperlink</strong>";
+                    var msg = MailHelper.CreateSingleEmail(from, to, subject, plainTextContent, htmlContent);
+                    var response = await client.SendEmailAsync(msg);
+                    ModelState.AddModelError(string.Empty, "Verification email sent. Please check your email.");
 
                     if (_userManager.Options.SignIn.RequireConfirmedAccount)
                     {

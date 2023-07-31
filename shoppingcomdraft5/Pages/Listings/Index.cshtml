@@ -1,11 +1,11 @@
 ﻿@page "{searchString?}"
-@model shoppingcomdraft5.Pages.Listings.IndexModel
+@model IndexModel
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Listings";
 }
 
-<h1>Index</h1>
+<h1>Listings</h1>
 
 <p>
     <a asp-page="Create">Create New</a>
@@ -15,7 +15,7 @@
         <select asp-for="ListingCategory" asp-items="Model.Category">
             <option value="">All</option>
         </select>
-        Title: <input type="text" asp-for="SearchString" />
+        Name: <input type="text" asp-for="SearchString" />
         <input type="submit" value="Filter" />
     </p>
 </form>
@@ -34,7 +34,7 @@
             <th>
                 @Html.DisplayNameFor(model => model.Listing[0].Price)
             </th>
-               <th>
+            <th>
                 @Html.DisplayNameFor(model => model.Listing[0].Condition)
             </th>
             <th></th>
@@ -63,8 +63,12 @@
                 <a asp-page="./Edit" asp-route-id="@item.ListingID">Edit</a> |
                 <a asp-page="./Details" asp-route-id="@item.ListingID">Details</a> |
                 <a asp-page="./Delete" asp-route-id="@item.ListingID">Delete</a>
+                <a class="btn btn-primary" asp-controller="Cart" asp-action="Add" asp-route-id="@item.ListingID">Add to cart</a>
             </td>
         </tr>
 }
     </tbody>
 </table>
+<div class="bg-success mt-3 p-3 text-white">
+    <vc:small-cart />
+</div>

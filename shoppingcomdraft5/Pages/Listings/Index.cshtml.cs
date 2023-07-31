@@ -47,7 +47,6 @@ namespace shoppingcomdraft5.Pages.Listings
             }
             Category = new SelectList(await genreQuery.Distinct().ToListAsync());
             Listing = await listings.ToListAsync();
-
         }
     }
 }
