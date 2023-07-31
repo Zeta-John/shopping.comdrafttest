@@ -143,13 +143,16 @@ namespace shoppingcomdraft5.Pages
                         string paypalOrderStatus = jsonResponse["status"]?.ToString() ?? "";
                         if (paypalOrderStatus == "COMPLETED")
                         {
-                            // clear the data                            
+                            // clear the data
+                            List<CartItem> cart = HttpContext.Session.GetJson<List<CartItem>>("Cart");
+                            cart.Clear();
+							HttpContext.Session.SetJson("Cart", cart);
 
-                            // update payment status in the database => "accepted"
+							// update payment status in the database => "accepted"
 
-                            // Clear cookie
+							// Clear cookie
 
-                            return new JsonResult("success");
+							return new JsonResult("success");
                         }
                     }
                 }
