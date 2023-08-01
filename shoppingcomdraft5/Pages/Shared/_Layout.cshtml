@@ -26,12 +26,27 @@
                             <a class="nav-link text-dark" asp-area="" asp-page="/Privacy">Privacy</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-page="/Listings/Index">Listings</a>
+                            @if (User.IsInRole("Staff"))
+                            {
+                                <a class="nav-link text-dark" asp-area="" asp-page="/Listings/Index">Listings Settings</a>
+                            }
+                        </li>
+                        <li class="nav-item">
+                            @if (User.IsInRole("Member"))
+                            {
+                                <a class="nav-link text-dark" asp-area="" asp-page="/Listings/Index">Listings</a>
+                            }
                         </li>
                         <li class="nav-item">
                             @if (User.IsInRole("Owner") || User.IsInRole("Admin"))
                             {
                                 <a class="nav-link text-dark" asp-area="" asp-page="/Roles/Index">Roles</a>
+                            }
+                        </li>
+                        <li class="nav-item">
+                            @if (User.IsInRole("Owner") || User.IsInRole("Admin"))
+                            {
+                                <a class="nav-link text-dark" asp-area="" asp-page="/Roles/Index">Audit Log</a>
                             }
                         </li>
                     </ul>

@@ -8,7 +8,10 @@
 <h1>Listings</h1>
 
 <p>
-    <a asp-page="Create">Create New</a>
+    @if (User.IsInRole("Staff"))
+    {
+        <a asp-page="Create">Create New</a>
+    }
 </p>
 <form>
     <p>
@@ -60,15 +63,29 @@
             </td>
 
             <td>
-                <a asp-page="./Edit" asp-route-id="@item.ListingID">Edit</a> |
-                <a asp-page="./Details" asp-route-id="@item.ListingID">Details</a> |
-                <a asp-page="./Delete" asp-route-id="@item.ListingID">Delete</a>
-                <a class="btn btn-primary" asp-controller="Cart" asp-action="Add" asp-route-id="@item.ListingID">Add to cart</a>
+                    @if (User.IsInRole("Staff"))
+                    {
+                        <a asp-page="./Edit" asp-route-id="@item.ListingID">Edit</a>
+                    }
+                    <a asp-page="./Details" asp-route-id="@item.ListingID">Details</a>
+                    @if (User.IsInRole("Staff"))
+                    {
+                        <a asp-page="./Delete" asp-route-id="@item.ListingID">Delete</a>
+                    }
+                    @if (User.IsInRole("Member"))
+                    {
+                        <a class="btn btn-primary" asp-controller="Cart" asp-action="Add" asp-route-id="@item.ListingID">Add to cart</a>
+                    }
+                
+                
             </td>
         </tr>
 }
     </tbody>
 </table>
-<div class="bg-success mt-3 p-3 text-white">
-    <vc:small-cart />
-</div>
+@if (User.IsInRole("Member"))
+{
+    <div class="bg-success mt-3 p-3 text-white">
+        <vc:small-cart />
+    </div>
+}
