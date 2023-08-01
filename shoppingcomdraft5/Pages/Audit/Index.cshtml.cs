@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
@@ -10,6 +12,7 @@ using shoppingcomdraft5.Models;
 
 namespace shoppingcomdraft5.Pages.Audit
 {
+    [Authorize(Roles = "Admin,Owner")]
     public class IndexModel : PageModel
     {
         private readonly shoppingcomdraft5.Data.shoppingcomdraft5Context _context;

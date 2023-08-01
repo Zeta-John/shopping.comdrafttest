@@ -125,6 +125,33 @@ namespace shoppingcomdraft5.Pages.Roles
             IdentityResult roleResult = await _userManager.AddToRoleAsync(AppUser, AppRole.Name);
             if (roleResult.Succeeded)
             {
+                // Create an auditrecord object
+                var auditlog = new AuditLog();
+
+                //Obtain logged in user's username
+                var userID = User.Identity.Name.ToString();
+                auditlog.Username = userID;
+
+                //Audit Action Type
+                auditlog.ActionType = "Gave Role";
+
+                //Time when the event occurred
+                auditlog.DateTimeStamp = DateTime.Now;
+
+                //Table Name
+                auditlog.TableName = "Roles";
+
+                //Table ID
+                auditlog.TableID = -1;
+
+                //Before changes
+                auditlog.BeforeChange = " ";
+
+                //After changes
+                auditlog.AfterChange = "Promoted " + AppUser + " to " + AppRole;
+
+                _context.AuditLogs.Add(auditlog);
+                await _context.SaveChangesAsync();
                 TempData["message"] = "Role added to this user successfully";
                 return RedirectToPage("Index");
             }
@@ -141,6 +168,33 @@ namespace shoppingcomdraft5.Pages.Roles
             ApplicationUser user = _context.Users.SingleOrDefault(u => u.UserName == delusername);
             if (await _userManager.IsInRoleAsync(user, delrolename))
             {
+                // Create an auditrecord object
+                var auditlog = new AuditLog();
+
+                //Obtain logged in user's username
+                var userID = User.Identity.Name.ToString();
+                auditlog.Username = userID;
+
+                //Audit Action Type
+                auditlog.ActionType = "Delete Role";
+
+                //Time when the event occurred
+                auditlog.DateTimeStamp = DateTime.Now;
+
+                //Table Name
+                auditlog.TableName = "Roles";
+
+                //Table ID
+                auditlog.TableID = -1;
+
+                //Before changes
+                auditlog.BeforeChange = " ";
+
+                //After changes
+                auditlog.AfterChange = "Remove  " + delusername + " from " + delrolename;
+
+                _context.AuditLogs.Add(auditlog);
+                await _context.SaveChangesAsync();
                 await _userManager.RemoveFromRoleAsync(user, delrolename);
                 TempData["message"] = "Role removed from this user successfully";
             }
