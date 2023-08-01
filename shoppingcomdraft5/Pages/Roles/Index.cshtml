@@ -32,7 +32,7 @@
         }
     </tbody>
 </table>
-@if (User.IsInRole("Owner"))
+@if (User.IsInRole("Owner") || User.IsInRole("Admin"))
 {
     <h3>[Add Role to User]</h3>
     <hr />
@@ -40,7 +40,7 @@
         <div class="col-md-4">
             <form method="post">
                 @Html.Label("Select User : ")
-                @Html.DropDownListFor(m => m.selectedusername, Model.UsersSelectList, "Select User", new { @class = "form-control" })
+                @Html.DropDownListFor(m => m.selectedusername, Model.AddUsersSelectList, "Select User", new { @class = "form-control" })
                 @Html.Label("Assign Role : ")
                 @Html.DropDownListFor(m => m.selectedrolename, Model.RolesSelectList, "Select Role", new { @class = "form-control" })
                 <br />
@@ -50,7 +50,6 @@
     </div>
 }
 
-
 <hr />
 <h3>[Delete A User from a Role]</h3>
 <hr />
@@ -58,7 +57,7 @@
     <div class="col-md-4">
         <form method="post">
             @Html.Label("Select User : ")
-            @Html.DropDownListFor(m => m.delusername, Model.UsersSelectList, "Select User",
+            @Html.DropDownListFor(m => m.delusername, Model.DelUsersSelectList, "Select User",
             new { @class = "form-control" })
             @Html.Label("Select Role : ")
             @Html.DropDownListFor(m => m.delrolename, Model.RolesSelectList, "Select Role",

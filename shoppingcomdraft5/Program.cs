@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using shoppingcomdraft5.Data;
+using Microsoft.Extensions.DependencyInjection;
 using shoppingcomdraft5.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Hosting;
@@ -90,7 +91,14 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
-var context = app.Services.CreateScope().ServiceProvider.GetRequiredService<shoppingcomdraft5Context>();
-SeedData.SeedDatabase(context);
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetRequiredService<shoppingcomdraft5Context>();
+    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+    var seedData = new SeedData(userManager, roleManager);
+    seedData.SeedDatabase(context);
+}
+
 
 app.Run();

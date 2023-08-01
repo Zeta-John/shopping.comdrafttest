@@ -165,14 +165,7 @@ namespace shoppingcomdraft5.Areas.Identity.Pages.Account
                     {
                         await _roleManager.CreateAsync(new IdentityRole("Staff"));
                     }
-                    if (user.Email =="owner@gmail.com")
-                    {
-                        await _userManager.AddToRoleAsync(user, "Owner");
-                    }
-                    else
-                    {
-                        await _userManager.AddToRoleAsync(user, "Member");
-                    }
+                    await _userManager.AddToRoleAsync(user, "Member");
                     _logger.LogInformation("User created a new account with password.");
 
                     /*var userId = await _userManager.GetUserIdAsync(user);

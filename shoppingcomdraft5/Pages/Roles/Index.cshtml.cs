@@ -30,7 +30,8 @@ namespace shoppingcomdraft5.Pages.Roles
         }
         public SelectList RolesSelectList;
         //contain a list of roles to populate select box
-        public SelectList UsersSelectList;
+        public SelectList AddUsersSelectList;
+        public SelectList DelUsersSelectList;
         // contain a list of Users to populate select box
         public string selectedrolename { set; get; }
         public string selectedusername { set; get; }
@@ -64,15 +65,22 @@ namespace shoppingcomdraft5.Pages.Roles
             if (User.IsInRole("Admin"))
             {
                 IQueryable<string> RoleQuery = from m in _roleManager.Roles where m.Name == "Member" orderby m.Name select m.Name;
-                IQueryable<string> UsersQuery = from u in _context.Users 
+                IQueryable<string> UsersQuery = from u in _context.Users
+                                                join ur in _context.UserRoles on u.Id equals ur.UserId into userRolesJoin
+                                                from ur in userRolesJoin.DefaultIfEmpty() // LEFT JOIN
+                                                where ur == null // Filter out users with no UserRole entry
+                                                orderby u.UserName
+                                                select u.UserName;
+                RolesSelectList = new SelectList(await RoleQuery.Distinct().ToListAsync());
+                AddUsersSelectList = new SelectList(await UsersQuery.Distinct().ToListAsync());
+
+                IQueryable<string> UsersQuery2 = from u in _context.Users
                                                 join ur in _context.UserRoles on u.Id equals ur.UserId
                                                 join r in _context.Roles on ur.RoleId equals r.Id
-                                                where u.Email != "owner@gmail.com" && u.Email != userEmail 
-                                                && r.Name != "Staff" 
-                                                && r.Name != "Admin"
-                                                orderby u.UserName select u.UserName;
-                RolesSelectList = new SelectList(await RoleQuery.Distinct().ToListAsync());
-                UsersSelectList = new SelectList(await UsersQuery.Distinct().ToListAsync());
+                                                where r.Name == "Member"
+                                                orderby u.UserName
+                                                select u.UserName;
+                DelUsersSelectList = new SelectList(await UsersQuery2.Distinct().ToListAsync());
                 // Get all the roles 
                 var roles = from r in _roleManager.Roles
                             select r;
@@ -83,7 +91,8 @@ namespace shoppingcomdraft5.Pages.Roles
                 IQueryable<string> RoleQuery = from m in _roleManager.Roles where m.Name != "Owner" orderby m.Name select m.Name;
                 IQueryable<string> UsersQuery = from u in _context.Users where u.Email != "owner@gmail.com" orderby u.UserName select u.UserName;
                 RolesSelectList = new SelectList(await RoleQuery.Distinct().ToListAsync());
-                UsersSelectList = new SelectList(await UsersQuery.Distinct().ToListAsync());
+                AddUsersSelectList = new SelectList(await UsersQuery.Distinct().ToListAsync());
+                DelUsersSelectList = new SelectList(await UsersQuery.Distinct().ToListAsync());
                 // Get all the roles 
                 var roles = from r in _roleManager.Roles
                             select r;
