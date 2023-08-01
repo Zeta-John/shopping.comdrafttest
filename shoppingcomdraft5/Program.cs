@@ -8,7 +8,9 @@ using Microsoft.Extensions.Hosting;
 using SendGrid;
 
 
+
 var builder = WebApplication.CreateBuilder(args);
+
 
 builder.Services.AddDbContext<shoppingcomdraft5Context>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("shoppingcomdraft5Context") ?? throw new InvalidOperationException("Connection string 'shoppingcomdraft5Context' not found.")));
@@ -91,6 +93,7 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
+
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<shoppingcomdraft5Context>();
@@ -99,6 +102,7 @@ using (var scope = app.Services.CreateScope())
     var seedData = new SeedData(userManager, roleManager);
     seedData.SeedDatabase(context);
 }
+
 
 
 app.Run();

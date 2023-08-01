@@ -7,6 +7,7 @@ namespace shoppingcomdraft5.Models
 {
     public class SeedData
     {
+
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
 
@@ -128,6 +129,7 @@ namespace shoppingcomdraft5.Models
                     _userManager.AddToRoleAsync(user, "Owner").Wait();
                 }
             }
+     
         }
     }
 }

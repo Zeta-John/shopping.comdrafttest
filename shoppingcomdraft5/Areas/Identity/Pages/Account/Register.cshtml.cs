@@ -24,7 +24,6 @@ using shoppingcomdraft5.Models;
 using static QRCoder.PayloadGenerator;
 using shoppingcomdraft5.Data;
 
-
 namespace shoppingcomdraft5.Areas.Identity.Pages.Account
 {
     public class RegisterModel : PageModel
@@ -48,6 +47,7 @@ namespace shoppingcomdraft5.Areas.Identity.Pages.Account
             IConfiguration configuration,
             RoleManager<IdentityRole> roleManager,
             shoppingcomdraft5Context db)
+
         {
             _userManager = userManager;
             _userStore = userStore;

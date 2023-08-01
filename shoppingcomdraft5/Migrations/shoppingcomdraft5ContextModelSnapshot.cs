@@ -128,7 +128,6 @@ namespace shoppingcomdraft5.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-           
 
             modelBuilder.Entity("shoppingcomdraft5.Models.ApplicationUser", b =>
                 {
@@ -205,6 +204,7 @@ namespace shoppingcomdraft5.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
+
             modelBuilder.Entity("shoppingcomdraft5.Models.AuditLog", b =>
                 {
                     b.Property<int>("Audit_ID")
@@ -242,6 +242,7 @@ namespace shoppingcomdraft5.Migrations
                     b.HasKey("Audit_ID");
 
                     b.ToTable("AuditLogs");
+
                 });
 
             modelBuilder.Entity("shoppingcomdraft5.Models.Listing", b =>
