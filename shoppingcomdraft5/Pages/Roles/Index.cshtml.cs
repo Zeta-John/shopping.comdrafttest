@@ -12,6 +12,7 @@ using Humanizer;
 using Microsoft.AspNetCore.Authorization;
 using System.Data;
 using System.Security.Claims;
+using System.Xml.Linq;
 
 namespace shoppingcomdraft5.Pages.Roles
 {
@@ -43,19 +44,38 @@ namespace shoppingcomdraft5.Pages.Roles
         {
             // Method - return a string showing a list of users based on specified role as parameter
             string strListUsersInRole = "";
-            string roleid = _roleManager.Roles.SingleOrDefault(u => u.Name == rolename).Id;
-            // Get no. of users for each specified role
-            var count = _context.UserRoles.Where(u => u.RoleId == roleid).Count();
-            usercountinrole = count;
-            //Get a list of users for each specified role
-            var listusers = _context.UserRoles.Where(u => u.RoleId == roleid);
-            foreach (var oParam in listusers)
-            { // loop thru each objects- get username based on userid and append to the returned string
-                var userobj = _context.Users.SingleOrDefault(s => s.Id == oParam.UserId);
-                strListUsersInRole += "[" + userobj.UserName + "] ";
+            if (User.IsInRole("Admin"))
+            {
+                string roleid = _roleManager.Roles.SingleOrDefault(u => u.Name == "Member").Id;
+                // Get no. of users for each specified role
+                var count = _context.UserRoles.Where(u => u.RoleId == roleid).Count();
+                usercountinrole = count;
+                //Get a list of users for each specified role
+                var listusers = _context.UserRoles.Where(u => u.RoleId == roleid);
+                foreach (var oParam in listusers)
+                { // loop thru each objects- get username based on userid and append to the returned string
+                    var userobj = _context.Users.SingleOrDefault(s => s.Id == oParam.UserId);
+                    strListUsersInRole += "[" + userobj.UserName + "] ";
 
+                }
+                return strListUsersInRole;
             }
-            return strListUsersInRole;
+            else
+            {
+                string roleid = _roleManager.Roles.SingleOrDefault(u => u.Name == rolename).Id;
+                // Get no. of users for each specified role
+                var count = _context.UserRoles.Where(u => u.RoleId == roleid).Count();
+                usercountinrole = count;
+                //Get a list of users for each specified role
+                var listusers = _context.UserRoles.Where(u => u.RoleId == roleid);
+                foreach (var oParam in listusers)
+                { // loop thru each objects- get username based on userid and append to the returned string
+                    var userobj = _context.Users.SingleOrDefault(s => s.Id == oParam.UserId);
+                    strListUsersInRole += "[" + userobj.UserName + "] ";
+
+                }
+                return strListUsersInRole;
+            }
         }
 
         public async Task OnGetAsync()
@@ -83,6 +103,7 @@ namespace shoppingcomdraft5.Pages.Roles
                 DelUsersSelectList = new SelectList(await UsersQuery2.Distinct().ToListAsync());
                 // Get all the roles 
                 var roles = from r in _roleManager.Roles
+                            where r.Name == "Member"
                             select r;
                 Listroles = await roles.ToListAsync();
             }
