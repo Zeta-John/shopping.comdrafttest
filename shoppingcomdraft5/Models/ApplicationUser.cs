@@ -8,11 +8,4 @@ namespace shoppingcomdraft5.Models
         public int Age { get; set; }
     }
 
-    public class ApplicationRole : IdentityRole
-    {
-        public string? Description { get; set; }
-        public DateTime CreatedDate { get; set; }
-        public string? IPAddress { get; set; }
-    }
-
 }

@@ -1,26 +1,156 @@
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
+using System.Linq;
+using shoppingcomdraft5.Models;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.EntityFrameworkCore;
-using shoppingcomdraft5.Models;
-using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using System;
+using Humanizer;
 using Microsoft.AspNetCore.Authorization;
+using System.Data;
+using System.Security.Claims;
 
 namespace shoppingcomdraft5.Pages.Roles
 {
-    [Authorize(Roles = "Admin/Owner")]
+    [Authorize(Roles = "Admin,Owner")]
     public class IndexModel : PageModel
     {
-        private readonly RoleManager<ApplicationRole> _roleManager;
-        public IndexModel(RoleManager<ApplicationRole> roleManager)
+        private readonly shoppingcomdraft5.Data.shoppingcomdraft5Context _context;
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly RoleManager<IdentityRole> _roleManager;
+        public IndexModel(shoppingcomdraft5.Data.shoppingcomdraft5Context context,
+       UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager)
         {
+            _context = context;
+            _userManager = userManager;
             _roleManager = roleManager;
         }
-        public List<ApplicationRole> ApplicationRole { get; set; }
-        public async Task OnGetAsync()
+        public SelectList RolesSelectList;
+        //contain a list of roles to populate select box
+        public SelectList AddUsersSelectList;
+        public SelectList DelUsersSelectList;
+        // contain a list of Users to populate select box
+        public string selectedrolename { set; get; }
+        public string selectedusername { set; get; }
+        public string delrolename { set; get; }
+        public string delusername { set; get; }
+        public int usercountinrole { set; get; }
+        public IList<IdentityRole> Listroles { get; set; }
+        public string ListUsersInRole(string rolename)
         {
-            // Get a list of roles
-            ApplicationRole = await _roleManager.Roles.ToListAsync();
+            // Method - return a string showing a list of users based on specified role as parameter
+            string strListUsersInRole = "";
+            string roleid = _roleManager.Roles.SingleOrDefault(u => u.Name == rolename).Id;
+            // Get no. of users for each specified role
+            var count = _context.UserRoles.Where(u => u.RoleId == roleid).Count();
+            usercountinrole = count;
+            //Get a list of users for each specified role
+            var listusers = _context.UserRoles.Where(u => u.RoleId == roleid);
+            foreach (var oParam in listusers)
+            { // loop thru each objects- get username based on userid and append to the returned string
+                var userobj = _context.Users.SingleOrDefault(s => s.Id == oParam.UserId);
+                strListUsersInRole += "[" + userobj.UserName + "] ";
+
+            }
+            return strListUsersInRole;
+        }
+
+        public async Task OnGetAsync()
+        { //HTTPGet - when form is being loaded
+          //get list of roles and users
+            string userEmail = User.FindFirstValue(ClaimTypes.Email);
+            if (User.IsInRole("Admin"))
+            {
+                IQueryable<string> RoleQuery = from m in _roleManager.Roles where m.Name == "Member" orderby m.Name select m.Name;
+                IQueryable<string> UsersQuery = from u in _context.Users
+                                                join ur in _context.UserRoles on u.Id equals ur.UserId into userRolesJoin
+                                                from ur in userRolesJoin.DefaultIfEmpty() // LEFT JOIN
+                                                where ur == null // Filter out users with no UserRole entry
+                                                orderby u.UserName
+                                                select u.UserName;
+                RolesSelectList = new SelectList(await RoleQuery.Distinct().ToListAsync());
+                AddUsersSelectList = new SelectList(await UsersQuery.Distinct().ToListAsync());
+
+                IQueryable<string> UsersQuery2 = from u in _context.Users
+                                                join ur in _context.UserRoles on u.Id equals ur.UserId
+                                                join r in _context.Roles on ur.RoleId equals r.Id
+                                                where r.Name == "Member"
+                                                orderby u.UserName
+                                                select u.UserName;
+                DelUsersSelectList = new SelectList(await UsersQuery2.Distinct().ToListAsync());
+                // Get all the roles 
+                var roles = from r in _roleManager.Roles
+                            select r;
+                Listroles = await roles.ToListAsync();
+            }
+            else
+            {
+                IQueryable<string> RoleQuery = from m in _roleManager.Roles where m.Name != "Owner" orderby m.Name select m.Name;
+                IQueryable<string> UsersQuery = from u in _context.Users where u.Email != "owner@gmail.com" orderby u.UserName select u.UserName;
+                RolesSelectList = new SelectList(await RoleQuery.Distinct().ToListAsync());
+                AddUsersSelectList = new SelectList(await UsersQuery.Distinct().ToListAsync());
+                DelUsersSelectList = new SelectList(await UsersQuery.Distinct().ToListAsync());
+                // Get all the roles 
+                var roles = from r in _roleManager.Roles
+                            select r;
+                Listroles = await roles.ToListAsync();
+            }
+        }
+
+    public async Task<IActionResult> OnPostAsync(string selectedusername, string selectedrolename)
+        {
+            //When the Assign button is pressed 
+            if ((selectedusername == null) || (selectedrolename == null))
+            {
+                return RedirectToPage("Index");
+            }
+            ApplicationUser AppUser = _context.Users.SingleOrDefault(u => u.UserName == selectedusername);
+            if (await _userManager.IsInRoleAsync(AppUser, "Member"))
+            {
+                await _userManager.RemoveFromRoleAsync(AppUser, "Member");
+            }
+            else if (await _userManager.IsInRoleAsync(AppUser, "Admin"))
+            {
+                await _userManager.RemoveFromRoleAsync(AppUser, "Admin");
+            }
+            else if (await _userManager.IsInRoleAsync(AppUser, "Staff"))
+            {
+                await _userManager.RemoveFromRoleAsync(AppUser, "Staff");
+            }
+
+            IdentityRole AppRole = await _roleManager.FindByNameAsync(selectedrolename);
+            IdentityResult roleResult = await _userManager.AddToRoleAsync(AppUser, AppRole.Name);
+            if (roleResult.Succeeded)
+            {
+                TempData["message"] = "Role added to this user successfully";
+                return RedirectToPage("Index");
+            }
+            return RedirectToPage("Index");
+        }
+        public async Task<IActionResult> OnPostDeleteUserRoleAsync(string delusername, string
+       delrolename)
+        {
+            //When the Delete this user from Role button is pressed 
+            if ((delusername == null) || (delrolename == null))
+            {
+                return RedirectToPage("Index");
+            }
+            ApplicationUser user = _context.Users.SingleOrDefault(u => u.UserName == delusername);
+            if (await _userManager.IsInRoleAsync(user, delrolename))
+            {
+                await _userManager.RemoveFromRoleAsync(user, delrolename);
+                TempData["message"] = "Role removed from this user successfully";
+            }
+            else
+            {
+                TempData["message"] = "Role removed from this user unsuccessfully";
+            }
+
+            return RedirectToPage("Index");
+
         }
     }
 }

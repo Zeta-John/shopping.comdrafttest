@@ -28,12 +28,19 @@
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-page="/Listings/Index">Listings</a>
                         </li>
+                        <li class="nav-item">
+                            @if (User.IsInRole("Owner") || User.IsInRole("Admin"))
+                            {
+                                <a class="nav-link text-dark" asp-area="" asp-page="/Roles/Index">Roles</a>
+                            }
+                        </li>
                     </ul>
                 </div>
                 <partial name="_LoginPartial" />
             </div>
         </nav>
     </header>
+
     @if (ViewData["NoContainer"] == null)
     {
         <div class="container">
@@ -46,6 +53,7 @@
     {
         @RenderBody()
     }
+
 
     <footer class="border-top footer text-muted">
         <div class="container">

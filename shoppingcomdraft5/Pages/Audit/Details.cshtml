@@ -1,0 +1,61 @@
+﻿@page
+@model shoppingcomdraft5.Pages.Audit.DetailsModel
+
+@{
+    ViewData["Title"] = "Details";
+}
+
+<h1>Details</h1>
+
+<div>
+    <h4>AuditLog</h4>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.AuditLog.Username)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.AuditLog.Username)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.AuditLog.DateTimeStamp)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.AuditLog.DateTimeStamp)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.AuditLog.ActionType)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.AuditLog.ActionType)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.AuditLog.TableName)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.AuditLog.TableName)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.AuditLog.TableID)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.AuditLog.TableID)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.AuditLog.BeforeChange)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.AuditLog.BeforeChange)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.AuditLog.AfterChange)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.AuditLog.AfterChange)
+        </dd>
+    </dl>
+</div>
+<div>
+    <a asp-page="./Edit" asp-route-id="@Model.AuditLog?.Audit_ID">Edit</a> |
+    <a asp-page="./Index">Back to List</a>
+</div>

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
 using shoppingcomdraft5.Data;
 using shoppingcomdraft5.Infrastructure;
 using shoppingcomdraft5.Models;
@@ -6,7 +7,9 @@ using shoppingcomdraft5.Models.ViewModels;
 
 namespace shoppingcomdraft5.Pages.Listings
 {
-	public class CartModel : PageModel
+
+    public class CartModel : PageModel
+
     {
         private readonly shoppingcomdraft5Context _context;
 

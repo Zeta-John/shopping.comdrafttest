@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using shoppingcomdraft5.Data;
 using shoppingcomdraft5.Models;
 
@@ -48,10 +50,41 @@ namespace shoppingcomdraft5.Pages.Listings
                 return Page();
             }
 
+            //Creating an audit record
+
+            var auditlog = new AuditLog();
+
+            //Obtain logged in user's username
+            var userID = User.Identity.Name.ToString();
+            auditlog.Username = userID;
+
+            //Audit Action Type
+            auditlog.ActionType = "Edit";
+
+            //Time when the event occurred
+            auditlog.DateTimeStamp = DateTime.Now;
+
+            //Table Name
+            auditlog.TableName = "Listing";
+
+            //Table ID
+            auditlog.TableID = Listing.ListingID;
+
+            //Before changes
+            var listingBeforeChanges = await _context.Listing.AsNoTracking().FirstOrDefaultAsync(m => m.ListingID == Listing.ListingID);
+            auditlog.BeforeChange = JsonConvert.SerializeObject(listingBeforeChanges);
+
+            //After changes
+            auditlog.AfterChange = JsonConvert.SerializeObject(Listing);
+        
+
             _context.Attach(Listing).State = EntityState.Modified;
 
             try
             {
+                await _context.SaveChangesAsync();
+
+                _context.AuditLogs.Add(auditlog);
                 await _context.SaveChangesAsync();
             }
             catch (DbUpdateConcurrencyException)

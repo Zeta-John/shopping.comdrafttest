@@ -22,6 +22,7 @@ using SendGrid.Helpers.Mail;
 using SendGrid;
 using shoppingcomdraft5.Models;
 using static QRCoder.PayloadGenerator;
+using shoppingcomdraft5.Data;
 
 namespace shoppingcomdraft5.Areas.Identity.Pages.Account
 {
@@ -34,6 +35,8 @@ namespace shoppingcomdraft5.Areas.Identity.Pages.Account
         private readonly ILogger<RegisterModel> _logger;
         private readonly IEmailSender _emailSender;
         public readonly IConfiguration _configuration;
+        private readonly RoleManager<IdentityRole> _roleManager;
+        private readonly shoppingcomdraft5Context _db;
 
         public RegisterModel(
             UserManager<ApplicationUser> userManager,
@@ -41,7 +44,10 @@ namespace shoppingcomdraft5.Areas.Identity.Pages.Account
             SignInManager<ApplicationUser> signInManager,
             ILogger<RegisterModel> logger,
             IEmailSender emailSender,
-            IConfiguration configuration)
+            IConfiguration configuration,
+            RoleManager<IdentityRole> roleManager,
+            shoppingcomdraft5Context db)
+
         {
             _userManager = userManager;
             _userStore = userStore;
@@ -50,6 +56,8 @@ namespace shoppingcomdraft5.Areas.Identity.Pages.Account
             _logger = logger;
             _emailSender = emailSender;
             _configuration = configuration;
+            _db = db;
+            _roleManager = roleManager;
         }
 
         /// <summary>
@@ -141,6 +149,23 @@ namespace shoppingcomdraft5.Areas.Identity.Pages.Account
 
                 if (result.Succeeded)
                 {
+                    if (!await _roleManager.RoleExistsAsync("Member"))
+                    {
+                        await _roleManager.CreateAsync(new IdentityRole("Member"));
+                    }
+                    if (!await _roleManager.RoleExistsAsync("Owner"))
+                    {
+                        await _roleManager.CreateAsync(new IdentityRole("Owner"));
+                    }
+                    if (!await _roleManager.RoleExistsAsync("Admin"))
+                    {
+                        await _roleManager.CreateAsync(new IdentityRole("Admin"));
+                    }
+                    if (!await _roleManager.RoleExistsAsync("Staff"))
+                    {
+                        await _roleManager.CreateAsync(new IdentityRole("Staff"));
+                    }
+                    await _userManager.AddToRoleAsync(user, "Member");
                     _logger.LogInformation("User created a new account with password.");
 
                     /*var userId = await _userManager.GetUserIdAsync(user);
